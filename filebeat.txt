@@ -1,0 +1,22 @@
+# Конфигурация curl -L -O https://raw.githubusercontent.com/elastic/beats/9.0/deploy/docker/filebeat.docker.yml
+
+docker run -d \
+  --name=filebeat \
+  --user=root \
+  --volume="$(pwd)/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro" \
+  --volume="/var/lib/docker/containers:/var/lib/docker/containers:ro" \
+  --volume="/var/run/docker.sock:/var/run/docker.sock:ro" \
+  --volume="registry:/usr/share/filebeat/data:rw" \
+  elastic/filebeat:8.4.1 filebeat -e --strict.perms=false \
+  -E output.elasticsearch.hosts=["192.168.56.160:9200"]
+
+
+  docker run \
+  --name mynginx1 \
+  --label co.elastic.logs/module=nginx \
+  --label co.elastic.logs/fileset.stdout=access \
+  --label co.elastic.logs/fileset.stderr=error \
+  -p 81:80 -d nginx
+
+
+# sudo auditctl -a exit,always -F path=/etc/nginx/nginx.conf -F perm=aw

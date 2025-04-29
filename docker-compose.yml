@@ -1,0 +1,43 @@
+version: '3'
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.29.0.0/16
+
+services:
+  elasticsearch:
+    container_name: elasticsearch-container
+    image: elasticsearch:8.4.1
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    ports:
+     - 9200:9200
+     - 9300:9300
+    volumes:
+     - data-elastic:/usr/share/elasticsearch/data
+    networks:
+      - default
+    labels:
+      org.label-schema.group: "monitoring"
+
+  kibana:
+    container_name: kibana-container
+    image: kibana:8.4.1
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch-container:9200
+    ports:
+     - 5601:5601
+    networks:
+      - default
+    depends_on:
+      - elasticsearch
+    labels:
+      org.label-schema.group: "monitoring"
+
+volumes:
+  data-elastic:
+    driver: local
